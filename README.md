@@ -23,3 +23,5 @@ Early development. Current milestone: loading screen and cat.
 ## Build & Runhttps://github.com/metaspawn/shofty
 
 Requirements: `nasm`, `qemu`, `make`
+## version
+0.0.2 early build v2-
