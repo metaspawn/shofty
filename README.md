@@ -18,7 +18,7 @@ Licensed under **GPL-3.0** — no one can ever close this code.
 
 ## Status
 
-Early development. Current milestone: boot sector that prints a welcome message.
+Early development. Current milestone: loading screen and cat.
 
 ## Build & Runhttps://github.com/metaspawn/shofty
 
