@@ -20,6 +20,6 @@ Licensed under **GPL-3.0** — no one can ever close this code.
 
 Early development. Current milestone: boot sector that prints a welcome message.
 
-## Build & Run
+## Build & Runhttps://github.com/metaspawn/shofty
 
 Requirements: `nasm`, `qemu`, `make`
