@@ -11,7 +11,7 @@ kernel_start:
     int 0x10
 
     call catdes_show
-
+jmp echo_loop
 print:
 .loop:
     lodsb
