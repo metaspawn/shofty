@@ -44,5 +44,7 @@ print:
 %include "kernel/menu.asm"
 %include "kernel/catdes.asm"
 %include "kernel/kernel_util.asm"
+%include "kernel/login.asm"
+%include "kernel/shell.asm"
 
 times 8192-($-$$) db 0
