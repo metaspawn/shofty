@@ -23,7 +23,7 @@ print:
     jmp .loop
 .done:
     ret
-
+%include "kernel/menu.asm"
 %include "kernel/catdes.asm"
 
 times 1024-($-$$) db 0
