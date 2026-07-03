@@ -5,7 +5,7 @@ all: shofty.img
 boot.bin: boot/boot.asm
 	nasm -f bin boot/boot.asm -o boot.bin
 
-kernel.bin: kernel/kernel.asm kernel/catdes.asm kernel/menu.asm
+kernel.bin: kernel/kernel.asm kernel/catdes.asm kernel/menu.asm/kernel_util.asm
 	nasm -f bin kernel/kernel.asm -o kernel.bin
 
 shofty.img: boot.bin kernel.bin
