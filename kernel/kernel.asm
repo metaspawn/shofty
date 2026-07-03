@@ -12,8 +12,6 @@ kernel_start:
 
     call catdes_show
 
-    jmp $
-
 print:
 .loop:
     lodsb
