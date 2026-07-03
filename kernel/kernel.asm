@@ -11,11 +11,12 @@ kernel_start:
     int 0x10
 
     call catdes_show
+call login_screen
 call vga_menu
 
     cmp byte [menu_choice], 0
     je enter_vga
-    jmp $                   ; "no" -> parked for now
+    jmp shell_start                  ; "no" -> parked for now
 
 enter_vga:
     mov ah, 0x00
