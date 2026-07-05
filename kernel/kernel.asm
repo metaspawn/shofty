@@ -37,4 +37,4 @@ print:
 %include "kernel/disk.asm"
 %include "kernel/sfm.asm"
 
-times 8192-($-$$) db 0
+times 16384-($-$$) db 0
