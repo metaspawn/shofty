@@ -1,7 +1,7 @@
 ; ================= SHOFTY SHELL =================
 ; Interactive shell. Needs: print_string, print_hex_byte (kernel_util.asm),
 ; current_user (login.asm), cat (catdes.asm data),
-; disk_read/disk_write/disk_err (disk.asm).
+; disk_read/disk_write/disk_err (disk.asm), sfm_format (sfm.asm).
 
 shell_start:
     ; clear screen (set video mode resets it)
@@ -54,6 +54,11 @@ shell_loop:
     call str_equals
     jc .do_disktest
 
+    mov si, input_buffer
+    mov di, cmd_format
+    call str_equals
+    jc .do_format
+
     ; unknown command
     mov si, msg_unknown
     call print_string
@@ -90,7 +95,7 @@ shell_loop:
     xor ax, ax
     mov es, ax          ; ES = 0, where our buffers live
 
-    ; DIAGNOSTIC: read sector 0 (boot sector) - tests reading only
+    ; read test: read sector 0 (boot sector)
     mov ax, 0
     mov bx, disk_buf
     call disk_read
@@ -126,6 +131,12 @@ shell_loop:
     call print_hex_byte
     mov si, shell_nl
     call print_string
+    jmp shell_loop
+
+.do_format:
+    xor ax, ax
+    mov es, ax          ; ES = 0 for disk buffers
+    call sfm_format
     jmp shell_loop
 
 ; ---------- read_line: reads keys into input_buffer until Enter ----------
@@ -193,7 +204,7 @@ str_equals:
     ret
 
 ; ---------- shell data ----------
-banner       db "SHOFTY shell v0.1", 13, 10
+banner       db "SHOFTY shell v0.2", 13, 10
              db "Type 'help' for commands.", 13, 10, 13, 10, 0
 prompt_open  db "shofty (", 0
 prompt_close db ")> ", 0
@@ -204,12 +215,14 @@ msg_help     db "Commands:", 13, 10
              db "  clear    - clear the screen", 13, 10
              db "  cat      - meow", 13, 10
              db "  vga      - graphics mode (any key returns)", 13, 10
-             db "  disktest - test disk read/write", 13, 10, 0
+             db "  disktest - test disk read/write", 13, 10
+             db "  format   - create SFM filesystem on disk", 13, 10, 0
 cmd_help     db "help", 0
 cmd_clear    db "clear", 0
 cmd_cat      db "cat", 0
 cmd_vga      db "vga", 0
 cmd_disktest db "disktest", 0
+cmd_format   db "format", 0
 msg_read_ok  db "read OK!", 13, 10, 0
 msg_dt_fail  db "disk error! code: ", 0
 disk_buf     times 512 db 0
