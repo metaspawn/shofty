@@ -23,7 +23,7 @@ start:
 
     mov bx, KERNEL_ADDR
     mov ah, 0x02
-    mov al, 16
+    mov al, 32
     mov ch, 0
     mov cl, 2
     mov dh, 0
@@ -46,6 +46,7 @@ print:
     jz .done
     mov ah, 0x0E
     mov bh, 0
+times 8192-($-$$) db 0
     int 0x10
     jmp .loop
 .done:
