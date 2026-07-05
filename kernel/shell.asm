@@ -90,6 +90,11 @@ shell_loop:
 .dt_fail:
     mov si, msg_dt_fail
     call print_string
+    ; print BIOS error code from AH as two hex digits
+    mov al, ah
+    call print_hex_byte
+    mov si, shell_nl
+    call print_string
     jmp shell_loop
 
 ; ---------- read_line: reads keys into input_buffer until Enter ----------
