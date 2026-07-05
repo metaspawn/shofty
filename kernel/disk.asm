@@ -9,7 +9,7 @@
 ;   AX = LBA sector number (0 = boot sector, 17 = superblock...)
 ;   ES:BX = memory buffer (512 bytes)
 ; Output:
-;   carry flag set on error
+;   carry flag set on error, error code saved in [disk_err]
 
 disk_read:
     push ax
@@ -19,9 +19,8 @@ disk_read:
     mov ah, 0x02            ; BIOS: read sectors
     mov al, 1               ; one sector
     mov dl, [boot_drive_k]
-    
-int 0x13
-    mov [disk_err], ah  ; save error code before restoring regs
+    int 0x13
+    mov [disk_err], ah      ; save BIOS error code (0 = success)
     pop dx
     pop cx
     pop ax
@@ -36,6 +35,7 @@ disk_write:
     mov al, 1
     mov dl, [boot_drive_k]
     int 0x13
+    mov [disk_err], ah      ; save BIOS error code (0 = success)
     pop dx
     pop cx
     pop ax
@@ -61,4 +61,6 @@ lba_to_chs:
     pop bx
     ret
 
-boot_drive_k db 0x00        ; drive number (0x00 = floppy A:)
+; ---------- disk data ----------
+boot_drive_k db 0x00        ; real value comes from bootloader (DL)
+disk_err     db 0           ; last BIOS int 0x13 error code
