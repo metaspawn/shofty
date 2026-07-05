@@ -12,7 +12,7 @@ shofty.img: boot.bin kernel.bin
 	cat boot.bin kernel.bin > shofty.img
 
 run: shofty.img
-	qemu-system-x86_64 -drive format=raw,file=shofty.img
+	qemu-system-x86_64 -drive format=raw,if=floppy,file=shofty.img
 
 clean:
 	rm -f *.bin *.img
