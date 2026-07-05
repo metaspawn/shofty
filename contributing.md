@@ -9,6 +9,6 @@ Contributions are welcome! SHOFTY is a learning project, so beginner PRs are tot
 4. Open a Pull Request explaining what you changed
 
 ## Rules
-- Pure NASM only (no C)
+- only code languages and tools
 - Comments in English
 - Keep main bootable
