@@ -57,5 +57,5 @@ boot_drive db 0
 msg_boot  db "SHOFTY boot: loading kernel...", 13, 10, 0
 msg_error db "Disk read error!", 13, 10, 0
 
-times 510 ($-$$) db 0
+times 510- ($-$$) db 0
 dw 0xAA55
