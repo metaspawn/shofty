@@ -16,8 +16,6 @@ kernel_start:
     int 0x10
     call catdes_show
     call login_screen
-call catdes_show
-    call login_screen
     jmp shell_start
     jmp $
 print:
