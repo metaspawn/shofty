@@ -7,18 +7,21 @@
 [bits 16]
 
 kernel_start:
+kernel_start:
     mov [boot_drive_k], dl  ; save real boot drive (from bootloader)
+    xor ax, ax
+    mov ds, ax              ; data segment = 0
+    mov es, ax              ; extra segment = 0 (critical for disk I/O!)
     mov ax, 0x0003
     int 0x10
-
+    call catdes_show
+    call login_screen
     call catdes_show
 call login_screen
 call vga_menu
-
     cmp byte [menu_choice], 0
     je enter_vga
     jmp shell_start                  ; "no" -> parked for now
-
 enter_vga:
     mov ah, 0x00
     mov al, 0x13
