@@ -31,6 +31,7 @@ start:
     int 0x13
     jc disk_error
 
+    mov dl, [boot_drive]    ; hand the real boot drive to the kernel
     jmp KERNEL_ADDR
 
 disk_error:
