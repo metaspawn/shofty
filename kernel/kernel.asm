@@ -35,5 +35,6 @@ print:
 %include "kernel/login.asm"
 %include "kernel/shell.asm"
 %include "kernel/disk.asm"
+%include "kernel/sfm.asm"
 
 times 8192-($-$$) db 0
