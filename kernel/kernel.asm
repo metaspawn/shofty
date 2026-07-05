@@ -7,8 +7,10 @@
 [bits 16]
 
 kernel_start:
+    mov [boot_drive_k], dl  ; save real boot drive (from bootloader)
     mov ax, 0x0003
     int 0x10
+    ...
 
     call catdes_show
 call login_screen
