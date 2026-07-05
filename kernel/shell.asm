@@ -9,6 +9,7 @@ shell_start:
     mov al, 0x03        ; 80x25 text mode
     int 0x10
 
+msg_unknown  db "Unknown 
     mov si, banner
     call print_string
 
@@ -23,6 +24,7 @@ shell_loop:
 
     call read_line      ; fills input_buffer, returns on Enter
 
+msg_unknown  db "Unknown 
     ; empty input? just prompt again
     mov si, input_buffer
     cmp byte [si], 0
@@ -186,3 +188,4 @@ msg_dt_fail  db "disk error!", 13, 10, 0
 disk_buf     db "SFM disk I/O works!", 13, 10, 0
              times 512-21 db 0
 input_buffer times 64 db 0
+msg_read_ok  db "read OK!", 13, 10, 0
