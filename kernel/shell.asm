@@ -65,6 +65,8 @@ shell_loop:
     jmp shell_loop
 
 .do_disktest:
+    xor ax, ax
+    mov es, ax              ; ES = 0, where our buffers live
     ; write test pattern to sector 20
     mov ax, 20
     mov bx, disk_buf
