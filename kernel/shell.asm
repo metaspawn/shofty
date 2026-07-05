@@ -66,13 +66,16 @@ shell_loop:
 
 .do_disktest:
     xor ax, ax
-    mov es, ax              ; ES = 0, where our buffers live
-    ; write test pattern to sector 20
-    mov ax, 20
+    mov es, ax
+    ; TEST: read-only - read sector 0 (boot sector) into disk_buf
+    mov ax, 0
     mov bx, disk_buf
-    call disk_write
+    call disk_read
     jc .dt_fail
 
+    mov si, msg_read_ok
+    call print_string
+    jmp shell_loop
     ; wipe the buffer to prove the read is real
     mov di, disk_buf
     mov cx, 512
