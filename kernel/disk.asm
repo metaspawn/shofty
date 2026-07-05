@@ -19,7 +19,9 @@ disk_read:
     mov ah, 0x02            ; BIOS: read sectors
     mov al, 1               ; one sector
     mov dl, [boot_drive_k]
-    int 0x13
+    
+int 0x13
+    mov [disk_err], ah  ; save error code before restoring regs
     pop dx
     pop cx
     pop ax
