@@ -1,7 +1,6 @@
 ; ================= SHOFTY SHELL =================
-; Interactive shell. Needs: print_string, print_hex_byte (kernel_util.asm),
-; current_user (login.asm), cat (catdes.asm data),
-; disk_read/disk_write/disk_err (disk.asm), sfm_format (sfm.asm).
+; Interactive shell. Needs: kernel_util.asm, login.asm,
+; catdes.asm, disk.asm, sfm.asm.
 
 shell_start:
     ; clear screen (set video mode resets it)
@@ -22,6 +21,9 @@ shell_loop:
     call print_string
 
     call read_line      ; fills input_buffer, returns on Enter
+
+    ; --- integrity guard: is the filesystem still alive? ---
+    call sfm_guard
 
     ; empty input? just prompt again
     mov si, input_buffer
@@ -59,6 +61,17 @@ shell_loop:
     call str_equals
     jc .do_format
 
+    mov si, input_buffer
+    mov di, cmd_chkdsk
+    call str_equals
+    jc .do_chkdsk
+
+    ; dev tool: injects corruption to test the integrity guard
+    mov si, input_buffer
+    mov di, cmd_corrupt
+    call str_equals
+    jc .do_corrupt
+
     ; unknown command
     mov si, msg_unknown
     call print_string
@@ -86,17 +99,15 @@ shell_loop:
     mov cx, 320*200
     rep stosb
 
-    ; wait for a key, then return to text shell
-    mov ah, 0
+    mov ah, 0           ; wait for key, return to text shell
     int 0x16
     jmp shell_start
 
 .do_disktest:
     xor ax, ax
-    mov es, ax          ; ES = 0, where our buffers live
+    mov es, ax
 
-    ; read test: read sector 0 (boot sector)
-    mov ax, 0
+    mov ax, 0           ; read test: boot sector
     mov bx, disk_buf
     call disk_read
     jc .dt_fail
@@ -104,8 +115,7 @@ shell_loop:
     mov si, msg_read_ok
     call print_string
 
-    ; write test: write pattern to sector 20, wipe, read back
-    mov ax, 20
+    mov ax, 20          ; write test: sector 20 round trip
     mov bx, disk_buf2
     call disk_write
     jc .dt_fail
@@ -135,37 +145,48 @@ shell_loop:
 
 .do_format:
     xor ax, ax
-    mov es, ax          ; ES = 0 for disk buffers
+    mov es, ax
     call sfm_format
+    jmp shell_loop
+
+.do_chkdsk:
+    xor ax, ax
+    mov es, ax
+    call sfm_diskcheck
+    jmp shell_loop
+
+.do_corrupt:
+    xor ax, ax
+    mov es, ax
+    call sfm_corrupt
     jmp shell_loop
 
 ; ---------- read_line: reads keys into input_buffer until Enter ----------
 read_line:
     mov di, input_buffer
-    xor cx, cx          ; char count
+    xor cx, cx
 
 .key:
     mov ah, 0
     int 0x16
 
-    cmp al, 0x0D        ; Enter -> done
+    cmp al, 0x0D        ; Enter
     je .done
 
     cmp al, 0x08        ; Backspace
     je .backspace
 
-    cmp cx, 63          ; buffer full? ignore key
+    cmp cx, 63
     jae .key
 
-    ; store + echo
-    stosb               ; [di] = al, di++
+    stosb
     inc cx
     mov ah, 0x0E
     int 0x10
     jmp .key
 
 .backspace:
-    test cx, cx         ; nothing to erase?
+    test cx, cx
     jz .key
     dec di
     dec cx
@@ -179,19 +200,19 @@ read_line:
     jmp .key
 
 .done:
-    mov byte [di], 0    ; null-terminate
+    mov byte [di], 0
     mov si, shell_nl
     call print_string
     ret
 
-; ---------- str_equals: compares SI vs DI, carry flag set if equal ----------
+; ---------- str_equals: compares SI vs DI, carry set if equal ----------
 str_equals:
 .loop:
     mov al, [si]
     mov bl, [di]
     cmp al, bl
     jne .no
-    test al, al         ; both hit null -> equal
+    test al, al
     jz .yes
     inc si
     inc di
@@ -216,13 +237,16 @@ msg_help     db "Commands:", 13, 10
              db "  cat      - meow", 13, 10
              db "  vga      - graphics mode (any key returns)", 13, 10
              db "  disktest - test disk read/write", 13, 10
-             db "  format   - create SFM filesystem on disk", 13, 10, 0
+             db "  format   - create SFM filesystem on disk", 13, 10
+             db "  chkdsk   - run disk examination", 13, 10, 0
 cmd_help     db "help", 0
 cmd_clear    db "clear", 0
 cmd_cat      db "cat", 0
 cmd_vga      db "vga", 0
 cmd_disktest db "disktest", 0
 cmd_format   db "format", 0
+cmd_chkdsk   db "chkdsk", 0
+cmd_corrupt  db "debug-corrupt", 0
 msg_read_ok  db "read OK!", 13, 10, 0
 msg_dt_fail  db "disk error! code: ", 0
 disk_buf     times 512 db 0
