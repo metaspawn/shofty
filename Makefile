@@ -13,6 +13,7 @@ shofty.img: boot.bin kernel.bin
 
 run: shofty.img
 	qemu-system-x86_64 -drive format=raw,file=shofty.img
+
 debug: shofty.img
 	qemu-system-x86_64 -drive format=raw,file=shofty.img -monitor stdio
 
