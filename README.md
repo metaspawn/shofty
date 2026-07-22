@@ -23,5 +23,12 @@ Early development. Current milestone: loading screen and cat.
 ## Build & Runhttps://github.com/metaspawn/shofty
 
 Requirements: `nasm`, `qemu`, `make`
+
+## Toolchain
+
+Parts of the kernel will be written in C and compiled with
+[Byte-found](https://github.com/metaspawn/Byte-found), a 16-bit real-mode C
+compiler built for this project.
+
 ## version
 0.0.2 early build v2-
