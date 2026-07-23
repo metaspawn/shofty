@@ -101,7 +101,7 @@ msg_banner: db 'SHOFTY', 10, 0
 msg_line:   db 'Protected mode reached. Running in ', 0
 msg_bits:   db '-bit mode.', 10, 0
 
-%include "kernel/vga32.asm"
+
 %include "drivers/vga32.asm"
 
     ; Write straight into VGA text memory. There is no BIOS here,
