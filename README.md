@@ -1,34 +1,65 @@
 # SHOFTY
 
-Free operating system written from scratch in C and NASM.
-Twin of the [BFC language](https://github.com/metaspawn) — born together, growing together.
+A hobby operating system written from scratch in x86 real-mode assembly (NASM).
 
-Named after Shofty, a tuxedo cat.
+Named after my cat.
 
-Part of the **MetaSpawn Project**.
+**Status:** alpha — bootable, with a working shell and disk I/O. Filesystem in progress.
 
-## Philosophy
+## Features
 
-- **Free forever.** No payments, no subscriptions, no premium tiers. Ever.
-- **No telemetry.** Your machine is yours. SHOFTY doesn't watch you.
-- **No greed.** This project exists to give, not to take.
-- **Understandable code.** Written to be read and learned from.
+- Custom bootloader
+- Login screen
+- Interactive shell: `help`, `clear`, `cat`, `vga`, `disktest`, `format`
+- Disk I/O through BIOS int 0x13 extensions (LBA addressing)
+- SFM, a filesystem of my own design (work in progress)
 
-Licensed under **GPL-3.0** — no one can ever close this code.
+## Build
 
-## Status
+    nasm -f bin boot/boot.asm -o boot.bin
+    nasm -f bin kernel/kernel.asm -o kernel.bin
+    cat boot.bin kernel.bin > shofty.img
 
-Early development. Current milestone: loading screen and cat.
+## Run
 
-## Build & Runhttps://github.com/metaspawn/shofty
+    qemu-system-i386 -drive format=raw,file=shofty.img
 
-Requirements: `nasm`, `qemu`, `make`
+## Structure
 
-## Toolchain
+    boot/boot.asm       bootloader
+    kernel/kernel.asm   entry point and %include hub
+    kernel/shell.asm    command interpreter
+    kernel/login.asm    login screen
+    kernel/menu.asm     menu system
+    kernel/disk.asm     disk I/O via int 0x13
+    kernel/sfm.asm      SFM filesystem
+    kernel/catdes.asm   cat command
+    kernel/kernel_util.asm  shared routines
 
-Parts of the kernel will be written in C and compiled with
-[Byte-found](https://github.com/metaspawn/Byte-found), a 16-bit real-mode C
-compiler built for this project.
+## Version history
 
-## version
-0.0.2 early build v2-
+### Alpha — current (the experimental branch is at end alpha)
+- SFM superblock written to sector 40 with "SFM1" magic bytes
+- Filesystem read/write in progress
+
+### v0.3 — disk access
+- LBA disk I/O through int 0x13 extensions
+- `disktest` and `format` commands
+
+### v0.2 — shell
+- Interactive command interpreter
+- `help`, `clear`, `cat`, `vga` commands
+
+### v0.1 — boot
+- Bootloader loading a kernel from disk
+- Login screen
+
+## Roadmap
+
+- SFM directory and file read/write
+- System call interface so external programs can use kernel services
+- Loading and executing programs from disk
+
+## License
+
+GPL-3.0
