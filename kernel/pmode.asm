@@ -79,6 +79,30 @@ pmode_entry:
 
     mov esp, 0x90000            ; a stack somewhere safe
 
+    call clear_screen32
+
+    mov esi, msg_banner
+    call print_string32
+
+    mov esi, msg_line
+    call print_string32
+
+    mov eax, 32
+    call print_dec32
+
+    mov esi, msg_bits
+    call print_string32
+
+.hang:
+    hlt
+    jmp .hang
+
+msg_banner: db 'SHOFTY', 10, 0
+msg_line:   db 'Protected mode reached. Running in ', 0
+msg_bits:   db '-bit mode.', 10, 0
+
+%include "kernel/vga32.asm"
+
     ; Write straight into VGA text memory. There is no BIOS here,
     ; so this is the only way to put anything on screen.
     mov edi, 0xB8000
