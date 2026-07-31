@@ -101,17 +101,4 @@ msg_banner: db 'SHOFTY', 10, 0
 msg_line:   db 'Protected mode reached. Running in ', 0
 msg_bits:   db '-bit mode.', 10, 0
 
-
 %include "drivers/vga32.asm"
-
-    ; Write straight into VGA text memory. There is no BIOS here,
-    ; so this is the only way to put anything on screen.
-    mov edi, 0xB8000
-    mov byte [edi],     'P'
-    mov byte [edi + 1], 0x0F    ; white on black
-    mov byte [edi + 2], 'M'
-    mov byte [edi + 3], 0x0F
-
-.hang:
-    hlt
-    jmp .hang
