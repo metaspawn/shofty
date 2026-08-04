@@ -14,7 +14,15 @@ kernel_start:
     int 0x10
     call catdes_show
     call login_screen
-    jmp shell_start
+
+    ; ask which mode to enter
+    call boot_menu
+    cmp byte [boot_choice], 1
+    je .enter_desktop
+    jmp shell_start            ; 0 = terminal (real-mode shell)
+
+.enter_desktop:
+    jmp switch_to_pmode        ; 1 = desktop mode (32-bit protected mode)
 
 print:
 .loop:
