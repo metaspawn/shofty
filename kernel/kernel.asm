@@ -27,13 +27,11 @@ print:
     jmp .loop
 .done:
     ret
-
-%include "kernel/menu.asm"
-%include "kernel/catdes.asm"
-%include "kernel/kernel_util.asm"
-%include "kernel/login.asm"
-%include "kernel/shell.asm"
-%include "kernel/disk.asm"
 %include "kernel/sfm.asm"
+
+; protected-mode switch + 32-bit VGA driver. Must be the LAST include
+; because pmode.asm ends in `bits 32` (and pulls in drivers/vga32.asm,
+; also 32-bit). Anything after it would assemble as 32-bit code.
+%include "kernel/pmode.asm"
 
 times 16384-($-$$) db 0
