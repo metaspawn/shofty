@@ -72,6 +72,11 @@ shell_loop:
     call str_equals
     jc .do_corrupt
 
+    mov si, input_buffer
+    mov di, cmd_pmode
+    call str_equals
+    jc .do_pmode
+
     ; unknown command
     mov si, msg_unknown
     call print_string
@@ -161,6 +166,13 @@ shell_loop:
     call sfm_corrupt
     jmp shell_loop
 
+.do_pmode:
+    ; one-way trip: real mode -> 32-bit protected mode.
+    ; The BIOS is gone after this, so the shell does not return.
+    mov si, msg_pmode
+    call print_string
+    jmp switch_to_pmode
+
 ; ---------- read_line: reads keys into input_buffer until Enter ----------
 read_line:
     mov di, input_buffer
@@ -238,7 +250,8 @@ msg_help     db "Commands:", 13, 10
              db "  vga      - graphics mode (any key returns)", 13, 10
              db "  disktest - test disk read/write", 13, 10
              db "  format   - create SFM filesystem on disk", 13, 10
-             db "  chkdsk   - run disk examination", 13, 10, 0
+             db "  chkdsk   - run disk examination", 13, 10
+             db "  pmode    - jump to 32-bit protected mode", 13, 10, 0
 cmd_help     db "help", 0
 cmd_clear    db "clear", 0
 cmd_cat      db "cat", 0
@@ -247,6 +260,8 @@ cmd_disktest db "disktest", 0
 cmd_format   db "format", 0
 cmd_chkdsk   db "chkdsk", 0
 cmd_corrupt  db "debug-corrupt", 0
+cmd_pmode    db "pmode", 0
+msg_pmode    db "Switching to protected mode...", 13, 10, 0
 msg_read_ok  db "read OK!", 13, 10, 0
 msg_dt_fail  db "disk error! code: ", 0
 disk_buf     times 512 db 0
