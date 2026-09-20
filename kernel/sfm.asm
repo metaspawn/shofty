@@ -569,6 +569,46 @@ sfm_list:
 .done:
     ret
 
+; ---------- sfm_read: print the content of a file by name ----------
+; Input: SI = name (0-terminated)
+sfm_read:
+    call sfm_find              ; DI -> entry, if found
+    jc .nofile
+
+    mov bp, [di+26]            ; BP = stored size (bytes)
+    mov ax, [di+24]            ; data sector
+    mov bx, sfm_buf
+    call disk_read
+    jc .fail
+
+    ; print exactly BP bytes from sfm_buf
+    mov si, sfm_buf
+    xor cx, cx
+.putc:
+    cmp cx, bp
+    jae .done
+    mov al, [si]
+    mov ah, 0x0E
+    int 0x10
+    inc si
+    inc cx
+    jmp .putc
+.done:
+    mov si, sfm_nl
+    call print_string
+    clc
+    ret
+.nofile:
+    mov si, msg_nofile
+    call print_string
+    stc
+    ret
+.fail:
+    mov si, msg_op_fail
+    call print_string
+    stc
+    ret
+
 ; ---------- superblock file counter ----------
 sfm_bump_count:
     mov ax, SFM_SUPER

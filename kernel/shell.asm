@@ -132,6 +132,11 @@ shell_loop:
     call str_prefix
     jc .do_remfil
 
+    mov si, input_buffer
+    mov di, cmd_readfil
+    call str_prefix
+    jc .do_readfil
+
     ; unknown command
     mov si, msg_unknown
     call print_string
@@ -315,6 +320,13 @@ shell_loop:
     call copy_name           ; -> name_buf (0-term)
     mov si, name_buf
     call sfm_delete
+    jmp shell_loop
+
+.do_readfil:
+    ; SI points past "readfil ". Remainder is the name.
+    call copy_name           ; -> name_buf (0-term)
+    mov si, name_buf
+    call sfm_read
     jmp shell_loop
 
 ; ---------- read_line: reads keys into input_buffer until Enter ----------
@@ -524,7 +536,8 @@ msg_help     db "Commands:", 13, 10
              db "  sh       - list files incl. hidden", 13, 10
              db "  cs N C   - create file N with content C", 13, 10
              db "  pstcon N C - overwrite file N content", 13, 10
-             db "  remfil N - remove file N", 13, 10, 0
+             db "  remfil N - remove file N", 13, 10
+             db "  readfil N - show content of file N", 13, 10, 0
 cmd_help     db "help", 0
 cmd_clear    db "clear", 0
 cmd_cat      db "cat", 0
@@ -545,6 +558,7 @@ cmd_sh       db "sh", 0
 cmd_cs       db "cs ", 0
 cmd_pstcon   db "pstcon ", 0
 cmd_remfil   db "remfil ", 0
+cmd_readfil  db "readfil ", 0
 msg_about    db "SHOFTY OS v0.2", 13, 10
              db "MetaSpawn Project - GPL-3.0", 13, 10
              db "x86 real-mode + 32-bit protected mode", 13, 10, 0
