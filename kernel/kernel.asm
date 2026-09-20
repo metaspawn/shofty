@@ -49,4 +49,4 @@ print:
 ; also 32-bit). Anything after it would assemble as 32-bit code.
 %include "kernel/pmode.asm"
 
-times 16384-($-$$) db 0
+times 32768-($-$$) db 0
