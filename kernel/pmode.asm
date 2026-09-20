@@ -1,104 +1,140 @@
-; pmode.asm - switch from 16-bit real mode to 32-bit protected mode
-; Entered in real mode. Once the far jump happens, the BIOS is gone:
-; no more int 0x10 or int 0x13.
-
+; pmode.asm - real mode -> 32-bit protected mode + graphical desktop (mode 13h)
 bits 16
 
 switch_to_pmode:
-    cli                         ; no interrupts until an IDT exists
-
+    mov ax, 0x0013
+    int 0x10
+    cli
     call enable_a20
-
-    lgdt [gdt_descriptor]       ; load the segment table
-
+    lgdt [gdt_descriptor]
     mov eax, cr0
-    or  eax, 1                  ; set the PE bit
+    or  eax, 1
     mov cr0, eax
-
-    ; The far jump is required: it flushes the prefetch queue and
-    ; loads CS with the new 32-bit code selector.
     jmp CODE_SEG:pmode_entry
 
-; ---------------------------------------------------------------
-; A20 gate - without this, address line 20 stays stuck and every
-; address above 1MB wraps back around to zero.
-; ---------------------------------------------------------------
 enable_a20:
-    in  al, 0x92                ; fast A20 via the system control port
+    in  al, 0x92
     or  al, 2
-    and al, 0xFE                ; keep bit 0 clear: setting it resets the CPU
+    and al, 0xFE
     out 0x92, al
     ret
 
-; ---------------------------------------------------------------
-; Global Descriptor Table: flat model, both segments span 0-4GB
-; ---------------------------------------------------------------
 gdt_start:
-
-gdt_null:                       ; the first entry must be all zeros
+gdt_null:
     dd 0
     dd 0
-
-gdt_code:                       ; base 0, limit 0xFFFFF, 4KB granularity
-    dw 0xFFFF                   ; limit  0:15
-    dw 0x0000                   ; base   0:15
-    db 0x00                     ; base  16:23
-    db 10011010b                ; present, ring 0, code, readable
-    db 11001111b                ; granularity, 32-bit, limit 16:19
-    db 0x00                     ; base  24:31
-
-gdt_data:                       ; same span, writable data segment
+gdt_code:
     dw 0xFFFF
     dw 0x0000
     db 0x00
-    db 10010010b                ; present, ring 0, data, writable
+    db 10011010b
     db 11001111b
     db 0x00
-
+gdt_data:
+    dw 0xFFFF
+    dw 0x0000
+    db 0x00
+    db 10010010b
+    db 11001111b
+    db 0x00
 gdt_end:
 
 gdt_descriptor:
-    dw gdt_end - gdt_start - 1  ; size, minus one
-    dd gdt_start                ; linear address
+    dw gdt_end - gdt_start - 1
+    dd gdt_start
 
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
 
-; ---------------------------------------------------------------
-; From here on the CPU runs 32-bit code.
-; ---------------------------------------------------------------
 bits 32
 
 pmode_entry:
-    mov ax, DATA_SEG            ; reload every data segment register
+    mov ax, DATA_SEG
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
     mov ss, ax
-
-    mov esp, 0x90000            ; a stack somewhere safe
-
-    call clear_screen32
-
-    mov esi, msg_banner
-    call print_string32
-
-    mov esi, msg_line
-    call print_string32
-
-    mov eax, 32
-    call print_dec32
-
-    mov esi, msg_bits
-    call print_string32
-
+    mov esp, 0x90000
+    call draw_desktop
 .hang:
     hlt
     jmp .hang
 
-msg_banner: db 'SHOFTY', 10, 0
-msg_line:   db 'Protected mode reached. Running in ', 0
-msg_bits:   db '-bit mode.', 10, 0
+draw_desktop:
+    mov al, 3
+    call clear_screen13
 
-%include "drivers/vga32.asm"
+    mov esi, 12
+    mov edi, 12
+    mov ecx, 26
+    mov edx, 26
+    mov al, 15
+    call fill_rect
+    mov esi, 14
+    mov edi, 14
+    mov ecx, 22
+    mov edx, 22
+    mov al, 1
+    call fill_rect
+
+    mov esi, 0
+    mov edi, 185
+    mov ecx, SCR_W
+    mov edx, 15
+    mov al, 7
+    call fill_rect
+    mov esi, 0
+    mov edi, 185
+    mov ecx, SCR_W
+    mov edx, 1
+    mov al, 15
+    call fill_rect
+
+    mov esi, 3
+    mov edi, 188
+    mov ecx, 44
+    mov edx, 9
+    mov al, 8
+    call fill_rect
+    mov esi, 3
+    mov edi, 188
+    mov ecx, 44
+    mov edx, 1
+    mov al, 15
+    call fill_rect
+    mov esi, 3
+    mov edi, 188
+    mov ecx, 1
+    mov edx, 9
+    mov al, 15
+    call fill_rect
+    mov esi, 6
+    mov edi, 189
+    mov ebx, str_start
+    mov dl, 15
+    call draw_string
+
+    mov esi, 270
+    mov edi, 188
+    mov ecx, 46
+    mov edx, 9
+    mov al, 8
+    call fill_rect
+    mov esi, 270
+    mov edi, 188
+    mov ecx, 46
+    mov edx, 1
+    mov al, 15
+    call fill_rect
+    mov esi, 273
+    mov edi, 189
+    mov ebx, str_clock
+    mov dl, 15
+    call draw_string
+    ret
+
+str_start: db "START", 0
+str_clock: db "12:00", 0
+
+%include "drivers/vga13.asm"
